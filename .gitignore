@@ -1,0 +1,22 @@
+# Binaries
+iurl
+iurl.exe
+
+# Build output
+dist/
+
+# Test
+*.test
+*.out
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# History
+.iurl_history
