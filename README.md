@@ -1,125 +1,125 @@
 # iurl
 
-Консольный HTTP-клиент с красивым форматированием JSON, поддержкой IPv4/IPv6/IPv8 и множеством фич из curl.
+Console HTTP client with pretty JSON formatting, support for IPv4/IPv6/IPv8, and many features from curl.
 
 ---
 
-## Для пользователей
+## For Users
 
-### Быстрый старт
+### Quick Start
 
 ```bash
-# Сборка
+# Build
 go build -o iurl ./cmd/iurl
 
-# Или через make
+# Or via make
 make build
 ```
 
-### Базовое использование
+### Basic Usage
 
 ```bash
-# Простой GET-запрос
+# Simple GET request
 iurl https://api.example.com
 
-# POST с JSON
+# POST with JSON
 iurl -X POST -d '{"name":"John"}' https://api.example.com/users
 
-# POST через --json (автоматически ставит Content-Type)
+# POST via --json (automatically sets Content-Type)
 iurl --json '{"name":"John"}' https://api.example.com/users
 
-# Только заголовки (HEAD)
+# Headers only (HEAD)
 iurl -I https://api.example.com
 ```
 
-### Тело запроса
+### Request Body
 
 ```bash
-# Form-urlencoded (автоматически ставит Content-Type)
+# Form-urlencoded (automatically sets Content-Type)
 iurl -d "name=John&age=30" https://api.example.com
 
-# JSON (автоматически ставит Content-Type)
+# JSON (automatically sets Content-Type)
 iurl --json '{"name":"John"}' https://api.example.com
 
-# JSON из файла
+# JSON from a file
 iurl --json @data.json https://api.example.com
 
-# Данные из stdin
+# Data from stdin
 echo "data" | iurl -d @- https://api.example.com
 
-# Загрузка файла через PUT
+# File upload via PUT
 iurl -T file.txt https://api.example.com/upload
 
-# URL-кодирование данных
+# URL-encode data
 iurl --data-urlencode "name=John Doe" https://api.example.com
 
 # Multipart form-data
 iurl -F "name=John" -F "file=@photo.jpg" https://api.example.com/upload
 ```
 
-### Аутентификация
+### Authentication
 
 ```bash
 # Basic auth
 iurl -u user:password https://api.example.com
 
-# Bearer token (через заголовок)
+# Bearer token (via header)
 iurl -H "Authorization: Bearer your-token" https://api.example.com
 ```
 
-### Заголовки
+### Headers
 
 ```bash
-# Один заголовок
+# Single header
 iurl -H "Accept: application/json" https://api.example.com
 
-# Несколько заголовков
+# Multiple headers
 iurl -H "Accept: application/json" -H "X-Custom: value" https://api.example.com
 ```
 
-### Запрос сжатого ответа
+### Compressed Response
 
 ```bash
 iurl --compressed https://api.example.com
 ```
 
-### Таймауты
+### Timeouts
 
 ```bash
-# Таймаут подключения (5 секунд)
+# Connection timeout (5 seconds)
 iurl --connect-timeout 5 https://api.example.com
 
-# Общий таймаут запроса (30 секунд)
+# Overall request timeout (30 seconds)
 iurl --max-time 30 https://api.example.com
 ```
 
-### Редиректы
+### Redirects
 
 ```bash
-# Следовать редиректам
+# Follow redirects
 iurl -L https://example.com/redirect
 
-# Лимит редиректов
+# Limit redirects
 iurl -L --max-redirs 5 https://example.com/redirect
 ```
 
-### Вывод
+### Output
 
 ```bash
-# Сохранить тело в файл
+# Save body to a file
 iurl -o response.json https://api.example.com
 
-# Сохранить с именем из URL
+# Save with the name from the URL
 iurl -O https://example.com/file.zip
 
-# Вывести заголовки ответа
+# Print response headers
 iurl -i https://api.example.com
 
-# Формат вывода
+# Output format
 iurl -w "%{http_code} %{time_total}s\n" https://api.example.com
 ```
 
-### IP-адреса
+### IP Addresses
 
 ```bash
 # IPv4
@@ -134,80 +134,80 @@ iurl 64496.192.0.2.1
 iurl http://64496.192.0.2.1/path
 ```
 
-### Прокси
+### Proxy
 
 ```bash
 iurl -x http://proxy:8080 https://api.example.com
 iurl -x http://proxy:8080 --proxy-user user:pass https://api.example.com
 ```
 
-### Повторные попытки
+### Retries
 
 ```bash
-# Повторить 3 раза при ошибке
+# Retry 3 times on failure
 iurl --retry 3 https://unstable.example.com
 
-# Задержка между попытками
+# Delay between retries
 iurl --retry 3 --retry-delay 2 https://unstable.example.com
 ```
 
 ### Cookies
 
 ```bash
-# Загрузить и сохранить cookies
+# Load and save cookies
 iurl -b cookies.txt -c cookies.txt https://api.example.com/login
 
-# Только загрузить
+# Load only
 iurl -b cookies.txt https://api.example.com/protected
 ```
 
-### Переменные и шаблоны
+### Variables and Templates
 
 ```bash
-# Переменные из файла (JSON, YAML, dotenv)
+# Variables from a file (JSON, YAML, dotenv)
 iurl --vars-file vars.json https://{{host}}/api
 
-# Переменные из командной строки
+# Variables from the command line
 iurl --var env=prod --var version=1.0 https://api.{{env}}.example.com/{{version}}/data
 ```
 
-### Фильтрация JSON (jq-like)
+### JSON Filtering (jq-like)
 
 ```bash
-# Извлечь поле
+# Extract a field
 iurl https://api.example.com/users --query '.[0].name'
 
-# Фильтрация
+# Filtering
 iurl https://api.example.com/logs --query '.[] | select(.level=="error")'
 
-# Агрегация
+# Aggregation
 iurl https://api.example.com/orders --query 'map(.total) | add'
 ```
 
-### Сравнение ответов
+### Response Comparison
 
 ```bash
-# Первый запрос — сохраняет baseline
+# First request – saves a baseline
 iurl --diff baseline https://api.example.com/status
 
-# Второй запрос — сравнивает с baseline
+# Second request – compares against the baseline
 iurl --diff baseline https://api.example.com/status
 ```
 
-### Мониторинг
+### Monitoring
 
 ```bash
-# Проверять каждые 10 секунд
+# Check every 10 seconds
 iurl --watch 10s https://api.example.com/status
 
-# Каждые 2 минуты
+# Every 2 minutes
 iurl --watch 2m https://api.example.com/status
 ```
 
-### Генерация кода
+### Code Generation
 
 ```bash
-# Сгенерировать Python-код
+# Generate Python code
 iurl --generate-code python https://api.example.com
 
 # Go
@@ -220,50 +220,50 @@ iurl --generate-code js https://api.example.com
 iurl --generate-code curl https://api.example.com
 ```
 
-### Профили запросов
+### Request Profiles
 
 ```bash
-# Сохранить профиль
+# Save a profile
 iurl --save my-request.json -X POST --json '{"key":"value"}' https://api.example.com
 
-# Загрузить и выполнить
+# Load and execute
 iurl --load my-request.json
 
-# Загрузить и переопределить URL
+# Load and override the URL
 iurl --load my-request.json https://other-api.com
 ```
 
-### История
+### History
 
 ```bash
-# Показать историю
+# Show history
 iurl --history
 
-# Поиск по тегу
+# Search by tag
 iurl --tag "auth-test" https://api.example.com/login
 iurl --search auth-test
 
-# Повторить запрос из истории
+# Rerun a request from history
 iurl --rerun 42
 ```
 
-### Интерактивный режим
+### Interactive Mode
 
 ```bash
-# Конструктор запросов
+# Request builder
 iurl --build
 
-# Сырой HTTP-диалог
+# Raw HTTP dialogue
 iurl --raw-shell https://api.example.com
 ```
 
-### Конфигурация
+### Configuration
 
 ```bash
-# Файл конфигурации
+# Configuration file
 iurl -K config.txt
 
-# Формат файла:
+# File format:
 # url = https://api.example.com
 # method = POST
 # header = Content-Type: application/json
@@ -271,148 +271,148 @@ iurl -K config.txt
 # user = admin:secret
 ```
 
-### Обработка ошибок
+### Error Handling
 
 ```bash
-# Тихий режим (без вывода)
+# Silent mode (no output)
 iurl -s https://api.example.com
 
-# Тихий режим с выводом ошибок
+# Silent mode but show errors
 iurl -s -S https://api.example.com
 
-# Ошибка при HTTP 4xx/5xx
+# Fail on HTTP 4xx/5xx
 iurl --fail https://api.example.com
 
-# Ошибка с телом ответа
+# Fail with response body
 iurl --fail-with-body https://api.example.com
 ```
 
-### Write-out формат
+### Write-out Format
 
 ```bash
-# Вывести код ответа и время
+# Print response code and time
 iurl -w "%{http_code} %{time_total}s\n" https://api.example.com
 
-# Доступные переменные:
-# %{http_code} - HTTP статус-код
-# %{http_content_type} - Content-Type ответа
-# %{time_total} - общее время запроса
-# %{size_download} - размер тела
-# %{url_effective} - итоговый URL
-# %{remote_ip} - IP сервера
-# %{remote_port} - порт сервера
+# Available variables:
+# %{http_code} – HTTP status code
+# %{http_content_type} – Content-Type of the response
+# %{time_total} – total request time
+# %{size_download} – body size
+# %{url_effective} – final effective URL
+# %{remote_ip} – server IP
+# %{remote_port} – server port
 ```
 
 ---
 
-## Для разработчиков
+## For Developers
 
-### Структура проекта
+### Project Structure
 
 ```
 iurl/
 ├── cmd/iurl/
-│   ├── main.go           # Точка входа, оркестрация
-│   └── main_test.go      # Интеграционные тесты
+│   ├── main.go           # Entry point, orchestration
+│   └── main_test.go      # Integration tests
 ├── internal/
-│   ├── cfg/              # Конфигурация, CLI, шаблоны, переменные
+│   ├── cfg/              # Configuration, CLI, templates, variables
 │   │   └── cfg.go
-│   ├── http/             # HTTP-клиент, построение запросов
+│   ├── http/             # HTTP client, request building
 │   │   └── http.go
-│   ├── fmt/              # Форматирование JSON с подсветкой
+│   ├── fmt/              # JSON formatting with highlighting
 │   │   └── fmt.go
-│   ├── cookiejar/        # Cookie jar (Netscape формат)
+│   ├── cookiejar/        # Cookie jar (Netscape format)
 │   │   ├── cookiejar.go
 │   │   └── cookiejar_test.go
-│   ├── repl/             # Интерактивный режим (tab-completion)
+│   ├── repl/             # Interactive mode (tab-completion)
 │   │   └── repl.go
-│   ├── query/            # jq-подобная фильтрация JSON
+│   ├── query/            # jq-like JSON filtering
 │   │   └── query.go
-│   ├── codegen/          # Генерация кода (python/go/js/curl)
+│   ├── codegen/          # Code generation (python/go/js/curl)
 │   │   └── codegen.go
-│   ├── storage/          # История, профили, diff-кеш
+│   ├── storage/          # History, profiles, diff cache
 │   │   └── storage.go
-│   └── interactive/      # Интерактивный конструктор запросов
+│   └── interactive/      # Interactive request builder
 │       └── interactive.go
 ├── Makefile
 ├── build.sh
 └── go.mod
 ```
 
-### Архитектура
+### Architecture
 
-**Поток выполнения:**
-1. `cfg.Parse()` — разбор CLI → `Config`
-2. `request.New()` — построение `http.Request` из `Config`
-3. `http.DoWithResult()` — выполнение запроса → `Result`
-4. `fmt.PrettyPrintJSON()` / `CopyRaw()` — вывод результата
+**Execution flow:**
+1. `cfg.Parse()` – parse CLI → `Config`
+2. `request.New()` – build `http.Request` from `Config`
+3. `http.DoWithResult()` – execute request → `Result`
+4. `fmt.PrettyPrintJSON()` / `CopyRaw()` – output the result
 
-**Зависимости:**
-- `github.com/chzyer/readline` — tab-completion в REPL
-- `golang.org/x/net` — HTTP/2 поддержка
-- `gopkg.in/yaml.v3` — YAML переменные
+**Dependencies:**
+- `github.com/chzyer/readline` – tab-completion in REPL
+- `golang.org/x/net` – HTTP/2 support
+- `gopkg.in/yaml.v3` – YAML variables
 
-### Сборка
+### Build
 
 ```bash
-# Локальная сборка
+# Local build
 make build
 
-# Сборка для всех платформ
+# Build for all platforms
 make all
 
-# Тесты
+# Tests
 make test
 
-# Линтер
+# Linter
 make lint
 
-# Очистка
+# Clean
 make clean
 ```
 
-### Тесты
+### Tests
 
 ```bash
-# Все тесты
+# All tests
 go test ./...
 
-# С verbose выводом
+# Verbose output
 go test ./... -v
 
-# Конкретный пакет
+# Specific package
 go test ./internal/config/ -v
 
-# Интеграционные тесты (с httptest)
+# Integration tests (with httptest)
 go test ./cmd/iurl/ -v
 ```
 
-### Добавление нового флага
+### Adding a New Flag
 
-1. Добавить поле в `Config` в `internal/cfg/cfg.go`
-2. Зарегистрировать флаг в `Parse()`
-3. Обработать логику в `cmd/iurl/main.go`
-4. Добавить описание в `PrintHelp()`
-5. Написать тест
+1. Add a field to `Config` in `internal/cfg/cfg.go`
+2. Register the flag in `Parse()`
+3. Handle the logic in `cmd/iurl/main.go`
+4. Add a description in `PrintHelp()`
+5. Write a test
 
-### Добавление нового пакета
+### Adding a New Package
 
-1. Создать директорию `internal/<name>/`
-2. Реализовать логику
-3. Написать тесты
-4. Импортировать в `cmd/iurl/main.go`
+1. Create a directory `internal/<name>/`
+2. Implement the logic
+3. Write tests
+4. Import in `cmd/iurl/main.go`
 
-### Формат cookie-файла
+### Cookie File Format
 
-Netscape формат (совместимый с curl):
+Netscape format (compatible with curl):
 ```
 # Netscape HTTP Cookie File
 .domain.com	TRUE	/	FALSE	1735689600	session	abc123
 ```
 
-Формат: `domain \t flag \t path \t secure \t expires \t name \t value`
+Format: `domain \t flag \t path \t secure \t expires \t name \t value`
 
-### Формат профиля запроса
+### Request Profile Format
 
 JSON:
 ```json
@@ -428,9 +428,9 @@ JSON:
 }
 ```
 
-### Формат истории
+### History Format
 
-JSON в `~/.iurl_history`:
+JSON in `~/.iurl_history`:
 ```json
 {
   "entries": [
@@ -447,9 +447,9 @@ JSON в `~/.iurl_history`:
 }
 ```
 
-### Скрипты автодополнения
+### Completion Scripts
 
-Для генерации скриптов автодополнения (bash/zsh/fish) используйте:
+To generate autocompletion scripts (bash/zsh/fish) use:
 
 ```bash
 iurl --completion bash > /etc/bash_completion.d/iurl
@@ -457,17 +457,17 @@ iurl --completion zsh > ~/.zsh/completions/_iurl
 iurl --completion fish > ~/.config/fish/completions/iurl.fish
 ```
 
-### Кросс-платформенность
+### Cross-Platform
 
-Проект работает на:
+The project works on:
 - Linux (amd64, arm64)
 - macOS (amd64, arm64)
 - Windows (amd64)
 
-История REPL хранится в `~/.iurl_history` (нормализация путей через `os.PathSeparator`).
+REPL history is stored in `~/.iurl_history` (paths are normalized using `os.PathSeparator`).
 
 ---
 
-## Лицензия
+## License
 
 MIT
