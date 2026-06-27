@@ -177,10 +177,10 @@ func matchCondition(item interface{}, cond string) (bool, error) {
 		}
 		if b, ok := val2.(bool); ok {
 			if val == "true" {
-				return b == true, nil
+				return b, nil
 			}
 			if val == "false" {
-				return b == false, nil
+				return !b, nil
 			}
 		}
 		return false, nil

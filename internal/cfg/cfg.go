@@ -94,7 +94,6 @@ type Config struct {
 	ParallelMax     int
 	Query           string
 	Diff            string
-	DiffName        string
 	ShowChain       bool
 	SaveProfile     string
 	LoadProfile     string
@@ -224,7 +223,7 @@ func Parse(args []string) (*Config, error) {
 	fs.BoolVar(&cfg.Parallel, "parallel", false, "Enable parallel transfers")
 	fs.IntVar(&cfg.ParallelMax, "parallel-max", 5, "Maximum parallel transfers")
 	fs.StringVar(&cfg.Query, "query", "", "Filter JSON response with jq-like expression")
-	fs.StringVar(&cfg.DiffName, "diff", "", "Compare with cached response")
+	fs.StringVar(&cfg.Diff, "diff", "", "Compare with cached response")
 	fs.BoolVar(&cfg.ShowChain, "show-chain", false, "Show redirect chain")
 	fs.StringVar(&cfg.SaveProfile, "save", "", "Save request profile to file")
 	fs.StringVar(&cfg.LoadProfile, "load", "", "Load request profile from file")
@@ -357,9 +356,7 @@ func Parse(args []string) (*Config, error) {
 		return nil, fmt.Errorf("cannot use -d, --json and -F simultaneously")
 	}
 
-	for _, fs := range cfg.FormString {
-		cfg.FormData = append(cfg.FormData, fs)
-	}
+	cfg.FormData = append(cfg.FormData, cfg.FormString...)
 
 	if (cfg.Body != "" || cfg.BodyStdin || cfg.JSON != "" || cfg.JSONFile != "" || len(cfg.FormData) > 0) && cfg.Method == "GET" {
 		cfg.Method = "POST"

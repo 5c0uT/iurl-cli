@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"time"
 
@@ -262,11 +261,4 @@ func SaveDiffCache(name string, data []byte) error {
 	os.MkdirAll(dir, 0755)
 	path := filepath.Join(dir, name+".json")
 	return os.WriteFile(path, data, 0644)
-}
-
-func sortEntries(entries []HistoryEntry) []HistoryEntry {
-	sort.Slice(entries, func(i, j int) bool {
-		return entries[i].Timestamp.After(entries[j].Timestamp)
-	})
-	return entries
 }

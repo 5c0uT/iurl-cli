@@ -73,7 +73,7 @@ func genPython(c *cfg.Config) string {
 	if c.Body != "" {
 		data = fmt.Sprintf("\"%s\"", escapeString(c.Body))
 	} else if c.JSON != "" {
-		data = fmt.Sprintf("%s", c.JSON)
+		data = c.JSON
 	}
 
 	lines = append(lines, fmt.Sprintf("url = \"%s\"", c.URLs[0]))

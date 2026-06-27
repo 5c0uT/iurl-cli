@@ -86,6 +86,12 @@ func NewRequest(c *cfg.Config) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
+	if c.JSONFile != "" {
+		jsonFile := c.JSONFile
+		req.GetBody = func() (io.ReadCloser, error) {
+			return os.Open(jsonFile)
+		}
+	}
 
 	for key, values := range c.Headers {
 		for _, value := range values {
@@ -116,6 +122,15 @@ func Do(req *http.Request, c *cfg.Config) (*Result, error) {
 
 	for attempt := 0; attempt <= c.Retry; attempt++ {
 		if attempt > 0 {
+			if req.GetBody != nil {
+				body, err := req.GetBody()
+				if err != nil {
+					return nil, fmt.Errorf("cannot reset request body for retry: %v", err)
+				}
+				req.Body = body
+			} else if req.Body != nil && req.Body != http.NoBody {
+				return nil, fmt.Errorf("cannot retry request with non-rewindable body")
+			}
 			time.Sleep(time.Duration(c.RetryDelay * float64(time.Second)))
 		}
 

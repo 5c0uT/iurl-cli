@@ -159,6 +159,10 @@ func main() {
 func executeRequest(c *cfg.Config, jar *cookiejar.Jar, vars cfg.Variables) int {
 	rawURL := c.URLs[0]
 
+	if c.Watch != "" {
+		return runWatch(c, jar, vars)
+	}
+
 	req, err := httpc.NewRequest(c)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error creating request: %v\n", err)
@@ -212,8 +216,16 @@ func executeRequest(c *cfg.Config, jar *cookiejar.Jar, vars cfg.Variables) int {
 
 	var bodyData []byte
 	if c.WriteOut != "" || c.RemoteName || c.MaxFilesize > 0 || c.LimitRate != "" || c.FailWithBody || c.Query != "" || c.Diff != "" {
+		if c.MaxFilesize > 0 && resp.ContentLength > c.MaxFilesize {
+			fmt.Fprintf(os.Stderr, "Error: response exceeds --max-filesize (%d > %d)\n", resp.ContentLength, c.MaxFilesize)
+			return 1
+		}
 		bodyData, _ = io.ReadAll(resp.Body)
 		resp.Body.Close()
+		if c.MaxFilesize > 0 && int64(len(bodyData)) > c.MaxFilesize {
+			fmt.Fprintf(os.Stderr, "Error: response exceeds --max-filesize (%d > %d)\n", len(bodyData), c.MaxFilesize)
+			return 1
+		}
 	} else {
 		bodyData = nil
 	}
@@ -221,10 +233,6 @@ func executeRequest(c *cfg.Config, jar *cookiejar.Jar, vars cfg.Variables) int {
 	if c.FailWithBody && resp.StatusCode >= 400 {
 		fmt.Fprintf(os.Stderr, "%s\n", string(bodyData))
 		return 1
-	}
-
-	if c.Watch != "" {
-		return runWatch(c, jar, vars)
 	}
 
 	if c.SaveProfile != "" {
@@ -557,14 +565,3 @@ func formatWriteOut(format string, resp *http.Response, duration time.Duration) 
 	result = strings.ReplaceAll(result, "%{remote_port}", resp.Request.URL.Port())
 	return result
 }
-
-func hasHeader(headers http.Header, key string) bool {
-	for k := range headers {
-		if strings.EqualFold(k, key) {
-			return true
-		}
-	}
-	return false
-}
-
-type bufioReader = io.Reader
